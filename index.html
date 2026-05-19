@@ -470,8 +470,9 @@ function loadQuestion() {
   }
 
   if(pool.length === 0) {
-    usedQuestions = [];
-    return loadQuestion();
+    // No more questions available - end game
+    endGame();
+    return;
   }
 
   currentQuestion = pool[Math.floor(Math.random() * pool.length)];
