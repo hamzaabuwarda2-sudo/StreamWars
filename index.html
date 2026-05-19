@@ -422,7 +422,7 @@ let score = 0;
 let streak = 0;
 let timer = 45;
 let currentQuestion;
-let usedQuestions = [];
+let usedQuestions = new Set();
 let dangerMode = false;
 let alarmPlayed = false;
 
@@ -458,15 +458,15 @@ function startGame() {
 
 function loadQuestion() {
 
-  let pool;
+  let pool = questions.filter(q => !usedQuestions.has(q.title));
 
   if(score >= 10) {
-    pool = questions.filter(q => q.difficulty === 'hard' && !usedQuestions.includes(q.title));
+    pool = pool.filter(q => q.difficulty === 'hard');
 
     if(!dangerMode) activateDangerMode();
 
   } else {
-    pool = questions.filter(q => q.difficulty === 'easy' && !usedQuestions.includes(q.title));
+    pool = pool.filter(q => q.difficulty === 'easy');
   }
 
   if(pool.length === 0) {
@@ -476,7 +476,7 @@ function loadQuestion() {
   }
 
   currentQuestion = pool[Math.floor(Math.random() * pool.length)];
-  usedQuestions.push(currentQuestion.title);
+  usedQuestions.add(currentQuestion.title);
 
   const title = document.getElementById('questionTitle');
   const poster = document.getElementById('poster');
