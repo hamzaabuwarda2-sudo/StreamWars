@@ -1,0 +1,618 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STREAM WARS</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }body {
+  background: #050505;
+  color: white;
+  overflow: hidden;
+  height: 100vh;
+}
+
+body.danger {
+  animation: dangerPulse 1.2s infinite;
+  background: linear-gradient(135deg, #120000, #000000);
+}
+
+@keyframes dangerPulse {
+  0% { background-color: #0a0000; }
+  50% { background-color: #1f0000; }
+  100% { background-color: #0a0000; }
+}
+
+.screen {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#startScreen {
+  background:
+    radial-gradient(circle at top, rgba(255,0,0,0.15), transparent 40%),
+    #050505;
+}
+
+.title {
+  font-size: 5rem;
+  letter-spacing: 8px;
+  font-weight: bold;
+  text-shadow: 0 0 30px red;
+  margin-bottom: 40px;
+}
+
+.start-btn {
+  padding: 20px 70px;
+  font-size: 2rem;
+  background: #c40000;
+  border: none;
+  color: white;
+  border-radius: 18px;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: 0 0 20px rgba(255,0,0,0.5);
+}
+
+.start-btn:hover {
+  transform: scale(1.08);
+  background: red;
+}
+
+#gameScreen {
+  display: none;
+  padding: 40px;
+  justify-content: flex-start;
+}
+
+.top-bar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 50px;
+}
+
+.score-box,
+.highscore-box {
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.left-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.timer-wrap {
+  position: relative;
+  width: 110px;
+  height: 110px;
+}
+
+.timer-circle {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  border: 7px solid red;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  font-weight: bold;
+  box-shadow: 0 0 20px rgba(255,0,0,0.6);
+}
+
+.question-area {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+}
+
+.question-title {
+  font-size: 3rem;
+  text-align: center;
+  text-shadow: 0 0 12px rgba(255,255,255,0.2);
+}
+
+.poster {
+  width: 260px;
+  height: 380px;
+  object-fit: cover;
+  border-radius: 18px;
+  border: 3px solid rgba(255,255,255,0.1);
+  box-shadow: 0 0 25px rgba(255,0,0,0.25);
+}
+
+.options {
+  width: 100%;
+  max-width: 900px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.option {
+  background: #101010;
+  border: 2px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 20px;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+
+.option:hover {
+  transform: scale(1.03);
+  border-color: rgba(255,0,0,0.5);
+}
+
+.option img {
+  max-width: 170px;
+  max-height: 70px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.correct {
+  background: rgba(0,255,0,0.15) !important;
+  border-color: #00ff6a !important;
+  box-shadow: 0 0 20px rgba(0,255,0,0.45);
+}
+
+.wrong {
+  background: rgba(255,0,0,0.15) !important;
+  border-color: red !important;
+  animation: shake 0.35s;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-10px); }
+  40% { transform: translateX(10px); }
+  60% { transform: translateX(-8px); }
+  80% { transform: translateX(8px); }
+  100% { transform: translateX(0); }
+}
+
+.popup {
+  position: absolute;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #00ff88;
+  animation: popupFloat 1s forwards;
+  pointer-events: none;
+}
+
+@keyframes popupFloat {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-80px);
+  }
+}
+
+#dangerOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.95);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 999;
+  animation: glitch 0.18s infinite;
+}
+
+#dangerOverlay h1 {
+  color: red;
+  font-size: 4rem;
+  text-shadow: 0 0 25px red;
+  letter-spacing: 5px;
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(2px, -2px); }
+  60% { transform: translate(-2px, -2px); }
+  80% { transform: translate(2px, 2px); }
+  100% { transform: translate(0); }
+}
+
+#endScreen {
+  display: none;
+  background: rgba(0,0,0,0.96);
+  text-align: center;
+  gap: 20px;
+}
+
+.final-score {
+  font-size: 4rem;
+  color: red;
+  text-shadow: 0 0 20px red;
+}
+
+.rank {
+  font-size: 2rem;
+}
+
+.restart-btn {
+  padding: 16px 50px;
+  font-size: 1.4rem;
+  border: none;
+  border-radius: 14px;
+  background: red;
+  color: white;
+  cursor: pointer;
+}
+
+.streak-box {
+  position: absolute;
+  top: 130px;
+  left: 40px;
+  color: #ff4444;
+  font-weight: bold;
+}
+
+  </style>
+</head>
+<body>  <div id="startScreen" class="screen">
+    <div class="title">STREAM WARS</div>
+    <button class="start-btn" onclick="startGame()">START</button>
+  </div>  <div id="gameScreen" class="screen"><div class="top-bar">
+
+  <div class="left-info">
+    <div class="score-box">SCORE: <span id="score">0</span></div>
+    <div class="highscore-box">HIGH SCORE: <span id="highscore">0</span></div>
+  </div>
+
+  <div class="timer-wrap">
+    <div class="timer-circle">
+      <span id="timer">45</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="streak-box">
+  STREAK: <span id="streak">0</span>/3
+</div>
+
+<div class="question-area">
+  <img id="poster" class="poster" style="display:none" />
+  <div class="question-title" id="questionTitle"></div>
+
+  <div class="options" id="options"></div>
+</div>
+
+  </div>  <div id="dangerOverlay">
+    <h1>DANGER MODE ACTIVATED</h1>
+  </div>  <div id="endScreen" class="screen">
+    <div class="title">TIME UP</div>
+    <div class="final-score">Score: <span id="finalScore"></span></div>
+    <div class="rank">Rank: <span id="rank"></span></div>
+    <button class="restart-btn" onclick="location.reload()">PLAY AGAIN</button>
+  </div><script>
+
+const questions = [
+  {
+    title: "Game Of Thrones",
+    network: "HBO MAX",
+    difficulty: "easy",
+    poster: "posters/got.jpg"
+  },
+  {
+    title: "Breaking Bad",
+    network: "AMC",
+    difficulty: "easy",
+    poster: "posters/breakingbad.jpg"
+  },
+  {
+    title: "The Boys",
+    network: "Amazon Prime",
+    difficulty: "easy",
+    poster: "posters/theboys.jpg"
+  },
+  {
+    title: "Dexter",
+    network: "SHOWTIME",
+    difficulty: "easy",
+    poster: "posters/dexter.jpg"
+  },
+  {
+    title: "The Walking Dead",
+    network: "AMC",
+    difficulty: "easy",
+    poster: "posters/twd.jpg"
+  },
+  {
+    title: "Wednesday",
+    network: "Netflix",
+    difficulty: "easy",
+    poster: "posters/wednesday.jpg"
+  },
+  {
+    title: "Prison Break",
+    network: "Fox",
+    difficulty: "hard",
+    poster: "posters/prisonbreak.jpg"
+  },
+  {
+    title: "Sherlock",
+    network: "BBC",
+    difficulty: "hard",
+    poster: "posters/sherlock.jpg"
+  },
+  {
+    title: "Dark",
+    network: "Netflix",
+    difficulty: "hard",
+    poster: "posters/dark.jpg"
+  },
+  {
+    title: "Mr Robot",
+    network: "USA Network",
+    difficulty: "hard",
+    poster: "posters/mrrobot.jpg"
+  }
+];
+
+const allNetworks = [
+  "Netflix",
+  "HBO MAX",
+  "AMC",
+  "SHOWTIME",
+  "Amazon Prime",
+  "Disney+",
+  "Fox",
+  "BBC",
+  "NBC",
+  "FX",
+  "The CW",
+  "ABC",
+  "USA Network",
+  "CinemaX",
+  "MGM+"
+];
+
+const logos = {
+  "Netflix": "logos/netflix.png",
+  "HBO MAX": "logos/hbo.png",
+  "AMC": "logos/amc.png",
+  "SHOWTIME": "logos/showtime.png",
+  "Amazon Prime": "logos/prime.png",
+  "Disney+": "logos/disney.png",
+  "Fox": "logos/fox.png",
+  "BBC": "logos/bbc.png",
+  "NBC": "logos/nbc.png",
+  "FX": "logos/fx.png",
+  "The CW": "logos/cw.png",
+  "ABC": "logos/abc.png",
+  "USA Network": "logos/usa.png",
+  "CinemaX": "logos/cinemax.png",
+  "MGM+": "logos/mgm.png"
+};
+
+let score = 0;
+let streak = 0;
+let timer = 45;
+let currentQuestion;
+let usedQuestions = [];
+let dangerMode = false;
+
+const ding = new Audio('sounds/ding.mp3');
+const buzz = new Audio('sounds/buzz.mp3');
+const alarm = new Audio('sounds/alarm.mp3');
+const dangerMusic = new Audio('sounds/danger.mp3');
+dangerMusic.loop = true;
+
+function startGame() {
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'flex';
+
+  document.getElementById('highscore').innerText = localStorage.getItem('streamwars_highscore') || 0;
+
+  loadQuestion();
+
+  const interval = setInterval(() => {
+    timer--;
+    document.getElementById('timer').innerText = timer;
+
+    if(timer <= 0) {
+      clearInterval(interval);
+      endGame();
+    }
+  }, 1000);
+}
+
+function loadQuestion() {
+
+  let pool;
+
+  if(score >= 10) {
+    pool = questions.filter(q => q.difficulty === 'hard' && !usedQuestions.includes(q.title));
+
+    if(!dangerMode) activateDangerMode();
+
+  } else {
+    pool = questions.filter(q => q.difficulty === 'easy' && !usedQuestions.includes(q.title));
+  }
+
+  if(pool.length === 0) {
+    usedQuestions = [];
+    return loadQuestion();
+  }
+
+  currentQuestion = pool[Math.floor(Math.random() * pool.length)];
+  usedQuestions.push(currentQuestion.title);
+
+  const title = document.getElementById('questionTitle');
+  const poster = document.getElementById('poster');
+
+  const showPoster = Math.random() > 0.5;
+
+  if(showPoster) {
+    poster.style.display = 'block';
+    poster.src = currentQuestion.poster;
+    title.innerText = '';
+  } else {
+    poster.style.display = 'none';
+    title.innerText = currentQuestion.title;
+  }
+
+  generateOptions();
+}
+
+function generateOptions() {
+
+  const optionsDiv = document.getElementById('options');
+  optionsDiv.innerHTML = '';
+
+  let options = [currentQuestion.network];
+
+  while(options.length < 4) {
+    let random = allNetworks[Math.floor(Math.random() * allNetworks.length)];
+
+    if(!options.includes(random)) {
+      options.push(random);
+    }
+  }
+
+  options = options.sort(() => Math.random() - 0.5);
+
+  options.forEach(option => {
+
+    const btn = document.createElement('div');
+    btn.className = 'option';
+
+    btn.innerHTML = `<img src="${logos[option]}" alt="${option}">`;
+
+    btn.onclick = () => checkAnswer(option, btn);
+
+    optionsDiv.appendChild(btn);
+  });
+}
+
+function checkAnswer(answer, btn) {
+
+  const options = document.querySelectorAll('.option');
+  options.forEach(o => o.style.pointerEvents = 'none');
+
+  if(answer === currentQuestion.network) {
+
+    btn.classList.add('correct');
+    ding.play();
+
+    let gained = score >= 10 ? 2 : 1;
+
+    score += gained;
+    streak++;
+
+    popup(`+${gained}`);
+
+    if(streak >= 3) {
+      score += 1;
+      popup('+1 BONUS');
+      streak = 0;
+    }
+
+  } else {
+
+    btn.classList.add('wrong');
+    buzz.play();
+    streak = 0;
+
+    if(score >= 10) {
+      score -= 1;
+    }
+  }
+
+  document.getElementById('score').innerText = score;
+  document.getElementById('streak').innerText = streak;
+
+  setTimeout(() => {
+    loadQuestion();
+  }, 700);
+}
+
+function popup(text) {
+  const pop = document.createElement('div');
+  pop.className = 'popup';
+  pop.innerText = text;
+
+  pop.style.left = Math.random() * 60 + 20 + '%';
+  pop.style.top = '45%';
+
+  document.body.appendChild(pop);
+
+  setTimeout(() => pop.remove(), 1000);
+}
+
+function activateDangerMode() {
+
+  dangerMode = true;
+
+  document.body.classList.add('danger');
+
+  const overlay = document.getElementById('dangerOverlay');
+  overlay.style.display = 'flex';
+
+  alarm.play();
+
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    dangerMusic.play();
+  }, 2500);
+}
+
+function endGame() {
+
+  document.getElementById('gameScreen').style.display = 'none';
+  document.getElementById('endScreen').style.display = 'flex';
+
+  document.getElementById('finalScore').innerText = score;
+
+  let rank = '';
+
+  if(score <= 7) rank = 'Casual Viewer';
+  else if(score <= 14) rank = 'Series Fan';
+  else if(score <= 24) rank = 'Binge Monster';
+  else if(score <= 34) rank = 'Stream Addict';
+  else rank = 'IMDb Demon';
+
+  document.getElementById('rank').innerText = rank;
+
+  const highscore = localStorage.getItem('streamwars_highscore') || 0;
+
+  if(score > highscore) {
+    localStorage.setItem('streamwars_highscore', score);
+  }
+}
+
+</script></body>
+</html>
