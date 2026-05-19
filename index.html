@@ -424,6 +424,7 @@ let timer = 45;
 let currentQuestion;
 let usedQuestions = [];
 let dangerMode = false;
+let alarmPlayed = false;
 
 const ding = new Audio('sounds/ding.mp3');
 const buzz = new Audio('sounds/buzz.mp3');
@@ -442,6 +443,11 @@ function startGame() {
   const interval = setInterval(() => {
     timer--;
     document.getElementById('timer').innerText = timer;
+
+    if(timer === 1 && !alarmPlayed) {
+      alarm.play();
+      alarmPlayed = true;
+    }
 
     if(timer <= 0) {
       clearInterval(interval);
